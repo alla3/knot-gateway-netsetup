@@ -14,11 +14,17 @@ import argparse
 import dbus
 import dbus.service
 import dbus.mainloop.glib
-import gobject as GObject
+#import gobject as GObject
+#from gi.repository import Gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import GObject
 
 import daemon
-from .wpantun import Wpantun
-from .ble import Ble
+## from wpantun import Wpantun
+## from ble import Ble
+from server_factory import ServerFactory
+from settings_factory import SettingsFactory
 
 mainloop = None
 
@@ -52,17 +58,14 @@ def register_gatt_error_cb(error):
 def main():
     global mainloop
 
-    parser = argparse.ArgumentParser(description="KNoT NetSetup Daemon")
+    parser = argparse.ArgumentParser(description="KNoT DBUS-Server Daemon")
     parser.add_argument("-w", "--working-dir", metavar="<path>",
                         default="/usr/local/bin",
                         type=str,
                         help="Daemon working directory")
-    parser.add_argument("-p", "--pid-file", metavar="<path/netsetup>",
-                        default="/tmp/netsetup", type=str,
+    parser.add_argument("-p", "--pid-file", metavar="<path/reset>",
+                        default="/tmp/reset", type=str,
                         help="PID file path and name")
-    parser.add_argument("-a", "--ad-name", metavar="<ad-name>",
-                        default="KNoTAdvertisement", type=str,
-                        help="Advertisement name")
     parser.add_argument("-n", "--detach-process", action="store_false",
                         help="Detached process")
     args = parser.parse_args()
@@ -80,27 +83,35 @@ def main():
     with context:
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-        wpan = Wpantun()
-        bluetooth = Ble(wpan, args.ad_name)
+        settings = SettingsFactory.create('settings.json')
+        server = ServerFactory.create(settings)
+        server.start()
+        ## wpan = Wpantun()
+        ## bluetooth = Ble(wpan, args.ad_name)
 
         mainloop = GObject.MainLoop()
 
-        bluetooth.ad_manager.RegisterAdvertisement(
-            bluetooth.ad_knot.get_path(), {},
-            reply_handler=register_ad_reply_cb,
-            error_handler=register_ad_error_cb)
+        ## bluetooth.ad_manager.RegisterAdvertisement(
+        ##     bluetooth.ad_knot.get_path(), {},
+        ##     reply_handler=register_ad_reply_cb,
+        ##     error_handler=register_ad_error_cb)
 
-        bluetooth.gatt_manager.RegisterApplication(
-            bluetooth.gatt_knot.get_path(), {},
-            reply_handler=register_gatt_reply_cb,
-            error_handler=register_gatt_error_cb)
+        ## bluetooth.gatt_manager.RegisterApplication(
+        ##     bluetooth.gatt_knot.get_path(), {},
+        ##     reply_handler=register_gatt_reply_cb,
+        ##     error_handler=register_gatt_error_cb)
 
         mainloop.run()
 
-        bluetooth.gatt_manager.UnregisterApplication(bluetooth.gatt_knot)
-        bluetooth.ad_manager.UnregisterAdvertisement(bluetooth.ad_knot)
-        dbus.service.Object.remove_from_connection(bluetooth.gatt_knot)
-        dbus.service.Object.remove_from_connection(bluetooth.ad_knot)
+
+        ### close connections
+        ### - mongo
+        ### - rabbitmq
+
+        ## bluetooth.gatt_manager.UnregisterApplication(bluetooth.gatt_knot)
+        ## bluetooth.ad_manager.UnregisterAdvertisement(bluetooth.ad_knot)
+        ## dbus.service.Object.remove_from_connection(bluetooth.gatt_knot)
+        ## dbus.service.Object.remove_from_connection(bluetooth.ad_knot)
 
 
 if __name__ == "__main__":
