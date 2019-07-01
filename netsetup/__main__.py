@@ -14,11 +14,11 @@ import argparse
 import dbus
 import dbus.service
 import dbus.mainloop.glib
-#import gobject as GObject
-#from gi.repository import Gtk
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import GObject
+import gobject as GObject
+
+#import gi
+#gi.require_version('Gtk', '3.0')
+#from gi.repository import GObject
 
 import daemon
 ## from wpantun import Wpantun
