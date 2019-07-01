@@ -31,7 +31,7 @@ class Control(dbus.service.Object):
     @dbus.service.method('br.org.cesar.knot.control.FactoryReset')
     def factory_reset(self):
         # stop Daemons
-        ### self._stop_processes()
+        self._stop_processes()
         # - knot-cloud
         # - knot-fog
         # - knot-connector
@@ -46,5 +46,5 @@ class Control(dbus.service.Object):
         # clean RabbitMQ
         self._rabbitmq_conn.remove_all()
         # reboot
-        ### os.system('reboot')
-        os.system('nautilus')
+        os.system('reboot')
+        #os.system('nautilus')
