@@ -8,7 +8,7 @@ import os
 import sys
 import signal
 import lockfile
-import functools
+#import functools
 import logging
 import argparse
 import dbus
@@ -23,7 +23,7 @@ from gi.repository import GObject
 import daemon
 ## from wpantun import Wpantun
 ## from ble import Ble
-from server_factory import ServerFactory
+from control_factory import ControlFactory
 from settings_factory import SettingsFactory
 
 mainloop = None
@@ -37,28 +37,28 @@ def quit_cb(signal_number, stack_frame):
     mainloop.quit()
 
 
-def register_ad_reply_cb():
-    logging.info('Advertisement registered')
+# def register_ad_reply_cb():
+#     logging.info('Advertisement registered')
 
 
-def register_ad_error_cb(error):
-    logging.info('Failed to register advertisement: ' + str(error))
-    mainloop.quit()
+# def register_ad_error_cb(error):
+#     logging.info('Failed to register advertisement: ' + str(error))
+#     mainloop.quit()
 
 
-def register_gatt_reply_cb():
-    logging.info('GATT application registered')
+# def register_gatt_reply_cb():
+#     logging.info('GATT application registered')
 
 
-def register_gatt_error_cb(error):
-    logging.info('Failed to register application: ' + str(error))
-    mainloop.quit()
+# def register_gatt_error_cb(error):
+#     logging.info('Failed to register application: ' + str(error))
+#     mainloop.quit()
 
 
 def main():
     global mainloop
 
-    parser = argparse.ArgumentParser(description="KNoT DBUS-Server Daemon")
+    parser = argparse.ArgumentParser(description="KNoT DBUS-Control Daemon")
     parser.add_argument("-w", "--working-dir", metavar="<path>",
                         default="/usr/local/bin",
                         type=str,
@@ -84,8 +84,8 @@ def main():
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
         settings = SettingsFactory.create('settings.json')
-        server = ServerFactory.create(settings)
-        server.start()
+        control = ControlFactory.create(settings)
+        control.start()
         ## wpan = Wpantun()
         ## bluetooth = Ble(wpan, args.ad_name)
 

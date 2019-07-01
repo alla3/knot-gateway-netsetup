@@ -27,6 +27,8 @@ GATT_DESC_IFACE = 'org.bluez.GattDescriptor1'
 LE_ADVERTISEMENT_IFACE = 'org.bluez.LEAdvertisement1'
 LE_ADVERTISING_MANAGER_IFACE = 'org.bluez.LEAdvertisingManager1'
 
+DBUS_INTERFACE_NAME = 'org.freedesktop.DBus'
+DBUS_NAME_OWNER_CHANGED = 'NameOwnerChanged'
 
 wpantun = None
 
@@ -469,6 +471,7 @@ class Ble(object):
         self.bus = dbus.SystemBus()
         wpantun = wpan
 
+        self.bus.add_signal_receiver(bluez_dbus_connect_cb, DBUS_NAME_OWNER_CHANGED, DBUS_INTERFACE_NAME, arg0=BLUEZ_SERVICE_NAME)
         self.ad_adapter = find_adapter(self.bus, LE_ADVERTISING_MANAGER_IFACE)
         if not self.ad_adapter:
             logging.error("LEAdvertiseManager1 interface not found")
@@ -496,6 +499,12 @@ class Ble(object):
             GATT_MANAGER_IFACE)
 
         self.gatt_knot = KnotApplication(self.bus)
+
+def bluez_dbus_connect_cb(self, name, oldOwner, newOwner):
+        if not oldOwner: 
+           logging.info('Bluetooth services is up!')
+        elif not newOwner:
+            logging.info('Bluetooth services is down!')
 
 
 def find_adapter(bus, iface):

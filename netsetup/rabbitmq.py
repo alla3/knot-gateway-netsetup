@@ -1,5 +1,8 @@
 from pika import BlockingConnection
 from pika import ConnectionParameters
+from pika import exceptions
+
+import logging
 
 class Singleton(type):
     """
@@ -22,13 +25,20 @@ class RabbitMQConn(object):
         self.params = ConnectionParameters()
 
     def connect(self):
-        self.conn = BlockingConnection(parameters=self.params)
-        #self.conn = BlockingConnection()
-        self.ch = self.conn.channel()
+        try:
+            self.conn = BlockingConnection(parameters=self.params)
+            self.ch = self.conn.channel()
+        except Exception as error:
+            raise error
 
-    def remove_queue(self, queue_name): # knot-fog-message knot-cloud-message
-        self.ch.queue_purge(queue=queue_name)
-        self.ch.queue_delete(queue=queue_name)
+    def remove_queue(self, queue_name):
+        try:
+            logging.info('Removing queue: ' + queue_name)
+            self.ch.queue_purge(queue=queue_name)
+            self.ch.queue_delete(queue=queue_name)
+        except (exceptions.ChannelWrongStateError,
+                exceptions.ChannelClosed) as error:
+            logging.error('Error: ' + str(error))
 
     def remove_all(self):
         queues = ['knot-fog-message', 'knot-cloud-message', 'knot-control-message']

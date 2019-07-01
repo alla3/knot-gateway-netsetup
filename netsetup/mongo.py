@@ -1,6 +1,7 @@
 from pymongo import MongoClient
+from pymongo import errors
 
-#client = MongoClient('mongodb://localhost:27017/')
+import logging
 
 class Singleton(type):
     """
@@ -29,12 +30,13 @@ class MongoConn(object):
         except Exception as error:
             raise error
 
-    def drop_db(self, database): #client.knot_fog client.knot_web
+    def drop_db(self, database):
         try:
+            logging.info('Removing database: ' + database)
             self.client.drop_database(database)
-        except Exception as error:
-            raise error
+        except errors.ServerSelectionTimeoutError as error:
+            logging.error('Fail: ' + str(error))
 
     def drop_all(self):
-        for db in self.client:
+        for db in self.client.list_database_names():
             self.drop_db(db)

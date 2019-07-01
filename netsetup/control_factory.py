@@ -1,8 +1,8 @@
 from mongo import MongoConn
 from rabbitmq import RabbitMQConn
-from reset import Server
+from control import Control
 
-class ServerFactory():
+class ControlFactory():
     @staticmethod
     def create(settings):
         mongodb_settings = settings.get('mongodb')
@@ -10,4 +10,4 @@ class ServerFactory():
                                mongodb_settings.get('port'))
         rabbitmq_conn = RabbitMQConn()
 
-        return Server(mongo_conm, rabbitmq_conn)
+        return Control(mongo_conm, rabbitmq_conn)
