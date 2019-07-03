@@ -1,13 +1,11 @@
-import json
-import os
+from pkg_resources import resource_string
 
-import logging
+import json
 
 class SettingsFactory():
     @staticmethod
     def create(filename):
-        print os.getcwd()
-        with open(filename) as json_file:
-            settings = json.load(json_file)
+        with resource_string(__name__, filename) as json_file:
+            settings = json.loads(json_file)
 
         return settings
